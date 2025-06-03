@@ -1,0 +1,26 @@
+name: build, push and deploy
+on: 
+  push:
+    branches:
+      - 'main'
+    paths:
+      - 'Dockerfile.dummy'
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Commit tag changes
+        run: |
+          newtag=$(awk -F "FROM " '{print $2}' Dockerfile.dummy)
+          sed -i "s/image:.*/image: europe-north1-docker.pkg.dev\/nais-management-233d\/nada\/nada-soda:${newtag}/g" .nais/naisjob.yaml
+          git config --global user.email ${{ github.actor }}@users.noreply.github.com
+          git config --global user.name ${{ github.actor }}
+          git add k8s/overlays
+          git commit -m "Updated image tag"
+          git push
