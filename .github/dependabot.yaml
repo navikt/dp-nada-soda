@@ -13,6 +13,8 @@ updates:
     schedule:
       interval: "weekly"
   - package-ecosystem: "docker"
+    registries:
+      - ghcr
     directory: "/"
     schedule:
       interval: "daily"
