@@ -5,6 +5,7 @@ on:
       - 'main'
     paths-ignore:
       - 'Dockerfile.dummy'
+      - '.github/workflows/bump_soda_image.yaml'
 
 jobs:
   deploy:
