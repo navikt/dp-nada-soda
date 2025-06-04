@@ -1,9 +1,11 @@
 version: 2
 
 registries:
-  gar:
+  ghcr:
     type: docker-registry
-    url: europe-north1-docker.pkg.dev
+    url: ghcr.io
+    username: user
+    password: ${{ secrets.READER_TOKEN }}
 
 updates:
   - package-ecosystem: "github-actions"
@@ -12,7 +14,7 @@ updates:
       interval: "weekly"
   - package-ecosystem: "docker"
     registries:
-      - gar
+      - ghcr
     directory: "/"
     schedule:
       interval: "daily"

@@ -1,1 +1,1 @@
-FROM europe-north1-docker.pkg.dev/nais-management-233d/nada/nada-soda:2025.06.03-10.46-b16fa04
+FROM ghcr.io/navikt/nada-soda/soda:2025.06.03-10.46-b16fa04
