@@ -20,6 +20,7 @@ jobs:
       - name: Commit tag changes
         env:
           GITHUB_TOKEN: ${{ secrets.WORKFLOW_PAT }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
           newtag=$(awk -F "FROM ghcr.io/navikt/nada-soda/soda:" '{print $2}' Dockerfile.dummy)
           sed -i "s|image: .*|image: europe-north1-docker.pkg.dev/nais-management-233d/nada/nada-soda:${newtag}|g" .nais/naisjob.yaml
