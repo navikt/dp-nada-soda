@@ -6,6 +6,11 @@ on:
     paths-ignore:
       - 'Dockerfile.dummy'
       - '.github/workflows/bump_soda_image.yaml'
+  workflow_run:
+    workflows:
+      - Update Soda Image Tag
+    types:
+      - completed
 
 jobs:
   deploy:
