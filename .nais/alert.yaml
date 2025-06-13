@@ -1,0 +1,24 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: soda-job-alerts
+  namespace: nada
+  labels:
+    team: nada
+spec:
+  groups:
+  - name: soda-job-alert
+    rules:
+    - alert: NaisjobDown
+      expr: kube_job_failed{job_name=~"^dataobs-soda-nada.*", namespace="nada"} > 0
+      for: 2m
+      annotations:
+        consequence: Nada sin naisjob feiler. Det betyr sannsynligvis at det er noe galt med imaget https://github.com/navikt/nada-soda eller servicen https://github.com/navikt/nada-soda-service
+        action: "Sjekk logger på https://logs.adeo.no for feil. Søk etter `container:dataobs-soda-nada* AND namespace:nada AND cluster:\"prod-gcp\"`"
+        summary: |-
+           Naisjob dataobs-soda-nada feiler i `prod-gcp:nada`!
+           Det er ikke viktig å få kjørt selve jobben, men det er sannsynlig at det finnes en feil i imaget vi tilbyr (https://github.com/navikt/nada-soda) eller i servicen (https://github.com/navikt/nada-soda-service)
+           Repo: https://github.com/navikt/dp-nada-soda
+      labels:
+        namespace: nada
+        severity: critical
