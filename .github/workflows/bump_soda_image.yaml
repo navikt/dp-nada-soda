@@ -15,7 +15,7 @@ jobs:
     name: Update Soda Image Tag
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Commit tag changes
         run: |
           newtag=$(awk -F "FROM ghcr.io/navikt/nada-soda/soda:" '{print $2}' Dockerfile.dummy)
