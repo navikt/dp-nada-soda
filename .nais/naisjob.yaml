@@ -6,7 +6,7 @@ metadata:
   name: dataobs-soda-nada
   namespace: nada
 spec:
-  image: europe-north1-docker.pkg.dev/nais-management-233d/nada/nada-soda:2026.01.22-08.39-8e6c689
+  image: europe-north1-docker.pkg.dev/nais-management-233d/nada/nada-soda:2026.02.04-14.44-7e95b17
   accessPolicy:
     outbound:
       rules:
