@@ -25,6 +25,7 @@ jobs:
         env:
           CLUSTER: dev-gcp
           RESOURCE: .nais/dev/soda-config.yaml,.nais/dev/soda-checks.yaml,.nais/dev/naisjob.yaml
+          TIMEOUT: 20m
 
   deploy-prod-gcp:
     name: Deploy-prod
@@ -39,3 +40,4 @@ jobs:
         env:
           CLUSTER: prod-gcp
           RESOURCE: .nais/prod/soda-config.yaml,.nais/prod/soda-checks.yaml,.nais/prod/naisjob.yaml
+          TIMEOUT: 20m
