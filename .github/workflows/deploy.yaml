@@ -14,7 +14,7 @@ on:
 
 jobs:
   deploy-dev-gcp:
-    name: Deploy
+    name: Deploy-dev
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -25,9 +25,9 @@ jobs:
         env:
           CLUSTER: dev-gcp
           RESOURCE: .nais/dev/soda-config.yaml,.nais/dev/soda-checks.yaml,.nais/dev/naisjob.yaml
-          
+
   deploy-prod-gcp:
-    name: Deploy
+    name: Deploy-prod
     runs-on: ubuntu-latest
     permissions:
       id-token: write
