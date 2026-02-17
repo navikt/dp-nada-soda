@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: soda-checks
+  namespace: nada
+data:
+  dataproducts.yaml: |
+    checks for classification_dataset:
+      # Standard numeric opplegg
+      - row_count > 0: # Kjedelig
+          name: "Kjedelig sjekk, korrelerer vel 100 prosent med en del av de andre sjekkene. DELETE!!"
+      - freshness(version) < 1d: # Litt gøyere
+          name: "Sjekker om data er box fresh: Er de mer enn ett døgn gamle?"
+      - duplicate_count(dataproduct_id) = 0: # Bør slå ut siden vi appender snapshots
+          name: "Har vi unike dataprodukt-idz?"
+      - values in dataproduct_id must exist in dataproducts dataproduct_id: # Bør ikke slå ut! Konsistens på tvers
+          name: "Sjekker om dataproduct_id i classification_datasets er et subset av dataproducts"
+      - schema: # Skjemasjekker
+          name: "Sjekker om kolonner er inkludert: Fail"
+          fail:
+            when required column missing: [dataproduct_id, kolonne_som_ikke_finnes_OG_VIKTIG]
+      - schema: 
+          name: "Sjekker om kolonner er inkludert: Warning"
+          warn:
+            when required column missing: [type, kolonne_som_ikke_finnes_men_ikke_så_viktig]
+    
+    
+    checks for dataproducts:
+      - missing_count(dataproduct_id) = 0 # Bør ikke slå ut
+      - missing_percent(pii) < 50 %
+    
+      # Eksempler på egendefinerte sjekker
+      - datasets_relative_to_dataproducts >= 1: # Kan bruke common table expressions -> Det du har i with-clause i SQL
+          datasets_relative_to_dataproducts expression: count(distinct dataset_id) / count(distinct dataproduct_id)
+          name: "Sjekker om vi har flere datasett enn dataprodukter"
+      - dataset_relative_to_dataproducts_sql >= 1: # Kan gjøre tilsvarende med SQL au
+          dataset_relative_to_dataproducts_sql query: |
+            SELECT COUNT(distinct dataset_id) - count(distinct dataproduct_id)
+            FROM dataproducts
+          name: "Sjekker om vi har flere datasett enn dataprodukter, men med SQL"
+

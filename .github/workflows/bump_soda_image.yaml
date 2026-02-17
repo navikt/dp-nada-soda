@@ -19,9 +19,9 @@ jobs:
       - name: Commit tag changes
         run: |
           newtag=$(awk -F "FROM ghcr.io/navikt/nada-soda/soda:" '{print $2}' Dockerfile.dummy)
-          sed -i "s|image: .*|image: europe-north1-docker.pkg.dev/nais-management-233d/nada/nada-soda:${newtag}|g" .nais/naisjob.yaml
+          sed -i "s|image: .*|image: europe-north1-docker.pkg.dev/nais-management-233d/nada/nada-soda:${newtag}|g" .nais/dev/naisjob.yaml .nais/prod/naisjob.yaml
           git config --global user.email ${{ github.actor }}@users.noreply.github.com
           git config --global user.name ${{ github.actor }}
-          git add .nais/naisjob.yaml
+          git add .nais/prod/naisjob.yaml .nais/dev/naisjob.yaml
           git commit -m "Updated Soda image tag to ${newtag}"
           git push

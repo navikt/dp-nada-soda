@@ -13,7 +13,20 @@ on:
       - completed
 
 jobs:
-  deploy:
+  deploy-dev-gcp:
+    name: Deploy
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+      - name: Deploy to dev-gcp
+        uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: dev-gcp
+          RESOURCE: .nais/dev/soda-config.yaml,.nais/dev/soda-checks.yaml,.nais/dev/naisjob.yaml
+          
+  deploy-prod-gcp:
     name: Deploy
     runs-on: ubuntu-latest
     permissions:
@@ -24,4 +37,4 @@ jobs:
         uses: nais/deploy/actions/deploy@v2
         env:
           CLUSTER: prod-gcp
-          RESOURCE: .nais/soda-config.yaml,.nais/soda-checks.yaml,.nais/naisjob.yaml
+          RESOURCE: .nais/prod/soda-config.yaml,.nais/prod/soda-checks.yaml,.nais/prod/naisjob.yaml
