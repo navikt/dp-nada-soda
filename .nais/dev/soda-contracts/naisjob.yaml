@@ -3,7 +3,7 @@ kind: Naisjob
 metadata:
   labels:
     team: nada
-  name: dataobs-soda-nada-contracts
+  name: soda-contracts
   namespace: nada
 spec:
   image: europe-north1-docker.pkg.dev/nais-management-233d/nada/nada-soda-contracts:2026.06.25-11.48-fc54273
