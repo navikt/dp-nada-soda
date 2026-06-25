@@ -5,12 +5,23 @@ on:
       - 'main'
     paths-ignore:
       - 'Dockerfile.dummy'
+      - 'Dockerfile.dummy-contracts'
       - '.github/workflows/bump_soda_image.yaml'
   workflow_run:
     workflows:
       - Update Soda Image Tag
     types:
       - completed
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: dev
+        type: choice
+        options:
+          - dev
+          - both
 
 jobs:
   deploy-dev:
@@ -24,12 +35,13 @@ jobs:
         uses: nais/deploy/actions/deploy@v2
         env:
           CLUSTER: dev-gcp
-          RESOURCE: .nais/dev/soda-config.yaml,.nais/dev/soda-checks.yaml,.nais/dev/naisjob.yaml
+          RESOURCE: .nais/dev/soda/soda-config.yaml,.nais/dev/soda/soda-checks.yaml,.nais/dev/soda/naisjob.yaml,.nais/dev/soda-contracts/soda-config.yaml,.nais/dev/soda-contracts/soda-checks.yaml,.nais/dev/soda-contracts/naisjob.yaml
 
   deploy-prod:
     name: Deploy-prod
     runs-on: ubuntu-latest
     needs: deploy-dev
+    if: github.event_name != 'workflow_dispatch' || inputs.environment == 'both'
     permissions:
       id-token: write
     steps:
@@ -38,4 +50,4 @@ jobs:
         uses: nais/deploy/actions/deploy@v2
         env:
           CLUSTER: prod-gcp
-          RESOURCE: .nais/prod/soda-config.yaml,.nais/prod/soda-checks.yaml,.nais/prod/naisjob.yaml
+          RESOURCE: .nais/prod/soda/soda-config.yaml,.nais/prod/soda/soda-checks.yaml,.nais/prod/soda/naisjob.yaml,.nais/prod/soda-contracts/soda-config.yaml,.nais/prod/soda-contracts/soda-checks.yaml,.nais/prod/soda-contracts/naisjob.yaml
