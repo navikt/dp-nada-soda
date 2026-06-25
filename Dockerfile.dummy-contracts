@@ -1,0 +1,1 @@
+FROM ghcr.io/navikt/nada-soda/nada-soda-contracts:2026.06.25-11.16-33ac9ad

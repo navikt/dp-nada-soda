@@ -1,4 +1,5 @@
-data_source platform_users:
-  type: bigquery
-  project_id: nada-prod-6977
-  dataset: platform_users
+type: bigquery
+name: dataproducts
+connection:
+  use_context_auth: true
+  project_id: nada-dev-db2e

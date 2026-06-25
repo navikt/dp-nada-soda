@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: soda-checks-contracts
+  namespace: nada
+data:
+  dataproducts.yaml: |
+    dataset: dataproducts/nada-dev-db2e/dataproducts/dataproducts
+
+    checks:
+      - row_count:
+          threshold:
+            must_be_greater_than_or_equal_to: 1
+
+    columns:
+      - name: id
+        checks:
+          - missing:
+      - name: type
+        checks:
+          - missing:
+              threshold:
+                metric: percent
+                must_be_less_than: 50

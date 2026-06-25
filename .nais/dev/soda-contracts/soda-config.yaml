@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: soda-config-contracts
+  namespace: nada
+data:
+  config.yaml: |
+    type: bigquery
+    name: dataproducts
+    connection:
+      use_context_auth: true
+      project_id: nada-dev-db2e

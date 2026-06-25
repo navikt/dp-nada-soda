@@ -1,0 +1,20 @@
+dataset: dataproducts/nada-dev-db2e/dataproducts/dataproducts
+
+checks:
+  - row_count:
+      threshold:
+        must_be_greater_than_or_equal_to: 1
+
+columns:
+  - name: id
+    checks:
+      - missing:
+      - duplicate:
+          threshold:
+            must_be_less_than: 1
+  - name: type
+    checks:
+      - missing:
+          threshold:
+            metric: percent
+            must_be_less_than: 50
