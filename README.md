@@ -1,33 +1,150 @@
-# NADA soda
-Naisjob example for periodically running [soda](https://github.com/sodadata/soda-core) checks against BigQuery tables and posting data quality errors to slack.
+# NADA Soda
+
+Example Naisjob for periodically running data quality checks against BigQuery and posting failures to Slack.
+Also serves as a smoketest for the full [nada-soda](https://github.com/navikt/nada-soda) + [nada-soda-service](https://github.com/navikt/nada-soda-service) setup.
+
+## Images
+
+Two image variants are available — choose based on which version of Soda you use:
+
+| GAR image (use in naisjob) | Soda version | Example |
+|----------------------------|-------------|---------|
+| `europe-north1-docker.pkg.dev/nais-management-233d/nada/nada-soda:<tag>` | v3 (SodaCL) | [.nais/dev/soda/](https://github.com/navikt/dp-nada-soda/tree/main/.nais/dev/soda) |
+| `europe-north1-docker.pkg.dev/nais-management-233d/nada/nada-soda-contracts:<tag>` | v4 (Contracts) | [.nais/dev/soda-contracts/](https://github.com/navikt/dp-nada-soda/tree/main/.nais/dev/soda-contracts) |
+
+The images are also mirrored to GHCR (`ghcr.io/navikt/nada-soda/soda` and `ghcr.io/navikt/nada-soda/soda-contracts`), which is used by Dependabot for automated tag bumping via `Dockerfile.dummy` and `Dockerfile.dummy-contracts`.
+
+See [navikt/nada-soda](https://github.com/navikt/nada-soda) for available tags and migration information from v3 to v4.
 
 ## Prerequisites
-The script run by the dockerimage requires
 
-- A [soda config](https://docs.soda.io/soda/connect-bigquery.html#connection-configuration) for connecting to one or several BigQuery datasource(s). See [config example](https://github.com/navikt/dp-nada-soda/blob/main/.local/soda-config/config.yaml) for configuring this for nais.
-- One or several [soda check config(s)](https://docs.soda.io/soda-cl/soda-cl-overview.html) describing the checks you want to perform on the BigQuery tables. See [config folder](https://github.com/navikt/dp-nada-soda/tree/main/.local/soda-checks) for examples.
-- The slack channel where you want to post data quality errors
+The Docker image requires:
 
-All of the above requirements must be configured with environment variables as described in [Required environment variables](#required-environment-variables) below. 
+- A **data source config** for connecting to BigQuery
+- One or more **check files** describing the tests to run
+- A Slack channel for data quality alerts
 
->Note: The script requires that a datasource name matches the file name for the corresponding data quality tests, e.g. [./local/soda-checks/doc_demo.yaml](https://github.com/navikt/dp-nada-soda/tree/main/.local/soda-checks/doc_demo.yaml) without file extension must match the datasource name `doc_demo` in the [connection config](https://github.com/navikt/dp-nada-soda/blob/main/.local/soda-config/config.yaml#L1).
+All of these must be provided via environment variables as described in [Environment variables](#environment-variables).
 
-### Required environment variables
-- `SODA_CONFIG`: Path to soda config file
-- `SODA_CHECKS_FOLDER`: Path to folder containing soda check files for BigQuery datasets
-- `SLACK_CHANNEL`: Desired slack channel for posting data quality errors
+### v3 (SodaCL) — data source config
 
-### Optional environment variables
-- `NOTIFY_OK_SCAN_STATUS`: Set to "true" if you want enable slack notifications for passing soda scans (requires [soda docker image](https://github.com/navikt/nada-soda) version >= `2024.06.07-06.31-207dd07`)
+The v3 config defines one data source per BigQuery dataset:
 
-## Deploy nais
-To deploy to nais you can start from the [example naisjob yaml](https://github.com/navikt/dp-nada-soda/blob/main/.nais/naisjob.yaml) and modify this for your setup.
+```yaml
+data_source <datasource_name>:
+  type: bigquery
+  project_id: <gcp-project-id>
+  dataset: <bq-dataset>
+```
 
-Change [the team and naisjob name](https://github.com/navikt/dp-nada-soda/blob/main/.nais/naisjob.yaml#L5-L7) and set [the slack channel](https://github.com/navikt/dp-nada-soda/blob/main/.nais/naisjob.yaml#L20-L21) you want your dataquality alerts to be posted to.
+See [soda-config.yaml](https://github.com/navikt/dp-nada-soda/blob/main/.nais/dev/soda/soda-config.yaml) for a complete example.
 
-The soda config and the soda check files described in [Prerequisites](#prerequisites) needs to be mounted into the container environment on nais. In this example these configurations files are mounted from configmaps deployed together with the naisjob to the cluster. In the [.nais folder](https://github.com/navikt/dp-nada-soda/tree/main/.nais) there is an example on how to do this, i.e.
+> Note: The check file name (without `.yaml`) must match the data source name in the config, e.g. `dataproducts.yaml` must match `data_source dataproducts:`.
 
-- The [soda config](https://github.com/navikt/dp-nada-soda/blob/main/.nais/soda-config.yaml) and [soda check files](https://github.com/navikt/dp-nada-soda/blob/main/.nais/soda-checks.yaml) are deployed as configmaps which are mounted into the naisjob pod as specified [here](https://github.com/navikt/dp-nada-soda/blob/main/.nais/naisjob.yaml#L27-L29).
-- The files described in the configmaps are then mounted in the `/var/run/configmaps` folder of the container. You can then set the `SODA_CONFIG` and `SODA_CHECKS_FOLDER` environment variables described in [Required environment variables](#required-environment-variables) as specified [here](https://github.com/navikt/dp-nada-soda/blob/main/.nais/naisjob.yaml#L16-L19)
+### v3 (SodaCL) — check files
 
-You will also need additional [project level iam roles](https://github.com/navikt/dp-nada-soda/blob/main/.nais/naisjob.yaml#L32-L46) for the naisjob service account in order to be allowed to perform the soda checks. Ensure that you set the correct project id for the roles.
+One check file can cover multiple tables in the same dataset. Each table is identified by a `checks for <table>:` block:
+
+```yaml
+checks for <table_name>:
+  - missing_count(column) = 0
+  - missing_percent(column) < 50 %
+
+  # Custom metric using expression (like a CTE)
+  - my_metric >= 1:
+      my_metric expression: count(distinct id)
+      name: "Check that we have at least one row"
+
+  # Custom metric using raw SQL
+  - my_sql_metric >= 1:
+      my_sql_metric query: |
+        SELECT COUNT(distinct id) FROM my_table
+      name: "Same check using SQL"
+```
+
+See [soda-checks.yaml](https://github.com/navikt/dp-nada-soda/blob/main/.nais/dev/soda/soda-checks.yaml) for a complete example. Full reference at [docs.soda.io/soda-cl](https://docs.soda.io/soda-cl/soda-cl-overview.html).
+
+### v4 (Contracts) — data source config
+
+The v4 config defines one data source per BigQuery project (the dataset is specified in the contract file instead):
+
+```yaml
+type: bigquery
+name: <datasource_name>
+connection:
+  use_context_auth: true
+  project_id: <gcp-project-id>
+```
+
+See [soda-config.yaml](https://github.com/navikt/dp-nada-soda/blob/main/.nais/dev/soda-contracts/soda-config.yaml) for a complete example.
+
+### v4 (Contracts) — check files
+
+In v4, each check file covers exactly **one table**. The table is identified by a fully-qualified `dataset` path:
+
+```
+dataset: <datasource_name>/<gcp-project-id>/<bq-dataset>/<table>
+```
+
+Checks can be defined at the dataset level (e.g. row count) or per column:
+
+```yaml
+dataset: dataproducts/my-project/my-dataset/my-table
+
+checks:
+  - row_count:
+      threshold:
+        must_be_greater_than_or_equal_to: 1
+
+columns:
+  - name: id
+    checks:
+      - missing:
+  - name: type
+    checks:
+      - missing:
+          threshold:
+            metric: percent
+            must_be_less_than: 50
+```
+
+See [soda-checks.yaml](https://github.com/navikt/dp-nada-soda/blob/main/.nais/dev/soda-contracts/soda-checks.yaml) for a complete example. Full reference at [docs.soda.io/reference/contract-language-reference](https://docs.soda.io/reference/contract-language-reference).
+
+## Environment variables
+
+### Required
+
+- `SODA_CONFIG`: Path to the data source config file
+- `SODA_CHECKS_FOLDER`: Path to the folder containing check files
+- `SLACK_CHANNEL`: Slack channel for data quality alerts (e.g. `#my-team-alerts`)
+
+### Optional
+
+- `NOTIFY_OK_SCAN_STATUS`: Set to `"true"` to also send Slack notifications when all checks pass
+
+## Deploy to Nais
+
+Start from the example naisjobs and adapt for your team:
+
+- v3: [.nais/dev/soda/naisjob.yaml](https://github.com/navikt/dp-nada-soda/blob/main/.nais/dev/soda/naisjob.yaml)
+- v4: [.nais/dev/soda-contracts/naisjob.yaml](https://github.com/navikt/dp-nada-soda/blob/main/.nais/dev/soda-contracts/naisjob.yaml)
+
+Update the team name, job name and Slack channel for your setup.
+
+### Mounting config and check files
+
+The config and check files must be mounted into the container. In this example they are deployed as Kubernetes ConfigMaps alongside the Naisjob. The ConfigMaps are then mounted via `filesFrom` in the naisjob spec, making the files available under `/var/run/configmaps/<configmap-name>/` in the container.
+
+The `SODA_CONFIG` and `SODA_CHECKS_FOLDER` environment variables are then set to point to these paths. See the full example in [.nais/dev/soda/](https://github.com/navikt/dp-nada-soda/tree/main/.nais/dev/soda) or [.nais/dev/soda-contracts/](https://github.com/navikt/dp-nada-soda/tree/main/.nais/dev/soda-contracts).
+
+### IAM permissions
+
+The naisjob service account needs the following project-level IAM roles to run the checks:
+
+- `roles/bigquery.dataViewer` — to read table data
+- `roles/bigquery.jobUser` — to run BigQuery jobs
+
+For v3 only, `roles/bigquery.readSessionUser` is also required for the BigQuery Storage Read API.
+
+Set the correct `project_id` under `gcp.permissions` in the naisjob spec.
+
