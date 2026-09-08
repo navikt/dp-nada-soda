@@ -1,1 +1,1 @@
-FROM ghcr.io/navikt/nada-soda/soda:2026.08.03-07.54-c72790a
+FROM ghcr.io/navikt/nada-soda/soda:2026.09.08-11.53-3ad8f09

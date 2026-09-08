@@ -6,7 +6,7 @@ metadata:
   name: soda-scan
   namespace: nada
 spec:
-  image: europe-north1-docker.pkg.dev/nais-management-233d/nada/nada-soda:2026.08.03-07.54-c72790a
+  image: europe-north1-docker.pkg.dev/nais-management-233d/nada/nada-soda:2026.09.08-11.53-3ad8f09
   accessPolicy:
     outbound:
       rules:
