@@ -32,7 +32,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: Deploy to dev-gcp
-        uses: nais/deploy/actions/deploy@v2
+        uses: nais/deploy/actions/deploy@v3
         env:
           CLUSTER: dev-gcp
           RESOURCE: .nais/dev/soda/soda-config.yaml,.nais/dev/soda/soda-checks.yaml,.nais/dev/soda/naisjob.yaml,.nais/dev/soda-contracts/soda-config.yaml,.nais/dev/soda-contracts/soda-checks.yaml,.nais/dev/soda-contracts/naisjob.yaml
@@ -47,7 +47,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: Deploy to prod-gcp
-        uses: nais/deploy/actions/deploy@v2
+        uses: nais/deploy/actions/deploy@v3
         env:
           CLUSTER: prod-gcp
           RESOURCE: .nais/prod/soda/soda-config.yaml,.nais/prod/soda/soda-checks.yaml,.nais/prod/soda/naisjob.yaml,.nais/prod/soda-contracts/soda-config.yaml,.nais/prod/soda-contracts/soda-checks.yaml,.nais/prod/soda-contracts/naisjob.yaml
