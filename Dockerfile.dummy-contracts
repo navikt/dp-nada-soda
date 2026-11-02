@@ -1,1 +1,1 @@
-FROM ghcr.io/navikt/nada-soda/soda-contracts:2026.10.26-14.12-8dbdecc
+FROM ghcr.io/navikt/nada-soda/soda-contracts:2026.11.02-14.09-0672209
