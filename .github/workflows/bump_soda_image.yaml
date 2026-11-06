@@ -5,7 +5,6 @@ on:
       - 'main'
     paths:
       - 'Dockerfile.dummy'
-      - 'Dockerfile.dummy-contracts'
 
 permissions:
   contents: write
@@ -19,14 +18,11 @@ jobs:
       - uses: actions/checkout@v7
       - name: Commit tag changes
         run: |
-          newtag=$(awk -F "FROM ghcr.io/navikt/nada-soda/soda:" '{print $2}' Dockerfile.dummy)
-          sed -i "s|image: .*nada-soda:.*|image: europe-north1-docker.pkg.dev/nais-management-233d/nada/nada-soda:${newtag}|g" .nais/dev/soda/naisjob.yaml .nais/prod/soda/naisjob.yaml
-
-          newtagcontracts=$(awk -F "FROM ghcr.io/navikt/nada-soda/soda-contracts:" '{print $2}' Dockerfile.dummy-contracts)
-          sed -i "s|image: .*nada-soda-contracts:.*|image: europe-north1-docker.pkg.dev/nais-management-233d/nada/nada-soda-contracts:${newtagcontracts}|g" .nais/dev/soda-contracts/naisjob.yaml .nais/prod/soda-contracts/naisjob.yaml
+          tag=$(awk -F "FROM ghcr.io/navikt/nada-soda/soda-contracts:" '{print $2}' Dockerfile.dummy)
+          sed -i "s|image: .*nada-soda-contracts:.*|image: europe-north1-docker.pkg.dev/nais-management-233d/nada/nada-soda-contracts:${tag}|g" .nais/dev/soda/naisjob.yaml .nais/prod/soda/naisjob.yaml
 
           git config --global user.email ${{ github.actor }}@users.noreply.github.com
           git config --global user.name ${{ github.actor }}
-          git add .nais/dev/soda/naisjob.yaml .nais/prod/soda/naisjob.yaml .nais/dev/soda-contracts/naisjob.yaml .nais/prod/soda-contracts/naisjob.yaml
+          git add .nais/dev/soda/naisjob.yaml .nais/prod/soda/naisjob.yaml
           git diff --staged --quiet || git commit -m "Updated Soda image tags"
           git push

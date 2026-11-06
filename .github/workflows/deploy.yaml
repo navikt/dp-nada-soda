@@ -5,7 +5,6 @@ on:
       - 'main'
     paths-ignore:
       - 'Dockerfile.dummy'
-      - 'Dockerfile.dummy-contracts'
       - '.github/workflows/bump_soda_image.yaml'
   workflow_run:
     workflows:
@@ -35,7 +34,7 @@ jobs:
         uses: nais/deploy/actions/deploy@v2
         env:
           CLUSTER: dev-gcp
-          RESOURCE: .nais/dev/soda/soda-config.yaml,.nais/dev/soda/soda-checks.yaml,.nais/dev/soda/naisjob.yaml,.nais/dev/soda-contracts/soda-config.yaml,.nais/dev/soda-contracts/soda-checks.yaml,.nais/dev/soda-contracts/naisjob.yaml
+          RESOURCE: .nais/dev/soda/soda-config.yaml,.nais/dev/soda/soda-checks.yaml,.nais/dev/soda/naisjob.yaml,.nais/dev/alert.yaml
 
   deploy-prod:
     name: Deploy-prod
@@ -50,4 +49,4 @@ jobs:
         uses: nais/deploy/actions/deploy@v2
         env:
           CLUSTER: prod-gcp
-          RESOURCE: .nais/prod/soda/soda-config.yaml,.nais/prod/soda/soda-checks.yaml,.nais/prod/soda/naisjob.yaml,.nais/prod/soda-contracts/soda-config.yaml,.nais/prod/soda-contracts/soda-checks.yaml,.nais/prod/soda-contracts/naisjob.yaml
+          RESOURCE: .nais/prod/soda/soda-config.yaml,.nais/prod/soda/soda-checks.yaml,.nais/prod/soda/naisjob.yaml,.nais/prod/alert.yaml
