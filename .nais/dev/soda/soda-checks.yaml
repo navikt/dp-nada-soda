@@ -1,21 +1,24 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: soda-checks
+  name: soda-checks-contracts
   namespace: nada
 data:
   dataproducts.yaml: |
-    checks for dataproducts:
-      - missing_count(id) = 0 # Bør ikke slå ut
-      - missing_percent(type) < 50 %
-    
-      # Eksempler på egendefinerte sjekker
-      - number_of_dataproducts >= 1: # Kan bruke common table expressions -> Det du har i with-clause i SQL
-          number_of_dataproducts expression: count(distinct id)
-          name: "Sjekker om vi har flere enn ett dataprodukt"
-      - number_of_dataproducts_sql >= 1: # Kan gjøre tilsvarende med SQL au
-          number_of_dataproducts_sql query: |
-            SELECT COUNT(distinct id)
-            FROM dataproducts
-          name: "Sjekker om vi har flere enn ett dataprodukt, men med SQL"
+    dataset: dataproducts/nada-dev-db2e/dataproducts/dataproducts
 
+    checks:
+      - row_count:
+          threshold:
+            must_be_greater_than_or_equal_to: 1
+
+    columns:
+      - name: id
+        checks:
+          - missing:
+      - name: type
+        checks:
+          - missing:
+              threshold:
+                metric: percent
+                must_be_less_than: 50
