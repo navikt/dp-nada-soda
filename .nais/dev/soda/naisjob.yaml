@@ -6,7 +6,7 @@ metadata:
   name: soda-contracts
   namespace: nada
 spec:
-  image: europe-north1-docker.pkg.dev/nais-management-233d/nada/nada-soda-contracts:2026.11.24.114447
+  image: europe-north1-docker.pkg.dev/nais-management-233d/nada/nada-soda-contracts:2026.11.25.121129
   accessPolicy:
     outbound:
       rules:
